@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Inasync</RootNamespace>
     <Authors>inasync</Authors>
-    <Description>TestAA is a simple library that supports writing tests using the Arrange-Act-Assert (AAA) pattern.</Description>
+    <Description>TestAA is a simple library to support writing tests using Arrange-Act-Assert (AAA) pattern.</Description>
     <PackageProjectUrl>https://github.com/in-async/TestAA</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/in-async/TestAA/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>library test unittest aaa</PackageTags>

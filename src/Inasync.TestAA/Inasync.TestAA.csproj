@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard1.0;net45</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Inasync</RootNamespace>
+    <Authors>inasync</Authors>
+    <Description>TestAA is a simple library that supports writing tests using the Arrange-Act-Assert (AAA) pattern.</Description>
+    <PackageProjectUrl>https://github.com/in-async/TestAA</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/in-async/TestAA/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageTags>library test unittest aaa</PackageTags>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+</Project>

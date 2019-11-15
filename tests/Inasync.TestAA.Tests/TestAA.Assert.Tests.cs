@@ -31,7 +31,7 @@ namespace Inasync.Tests {
                 TestCase( 0, new TestActual(null), null                 , new AssertOthers(), expected: (exception: null, others: true )),
                 TestCase( 1, new TestActual(null), new AssertException(), null              , expected: (exception: null, others: false)),
                 TestCase( 2, new TestActual(null), new AssertException(), new AssertOthers(), expected: (exception: null, others: true )),
-                TestCase( 3, new TestActual(ex)  , null                 , new AssertOthers(), expected: (exception: null, others: false), expectedExceptionType: typeof(DummyException)),
+                TestCase( 3, new TestActual(ex)  , null                 , new AssertOthers(), expected: (exception: null, others: false), expectedExceptionType: typeof(TestAssertException)),
                 TestCase( 4, new TestActual(ex)  , new AssertException(), null              , expected: (exception: ex  , others: false)),
                 TestCase( 5, new TestActual(ex)  , new AssertException(), new AssertOthers(), expected: (exception: ex  , others: true )),
             }) { action(); }
@@ -66,7 +66,7 @@ namespace Inasync.Tests {
                 TestCase( 2, new TestActual<DummyObject>(obj , null), new AssertReturn(), new AssertException(), null              , expected: (@return: obj , exception: null, others: false)),
                 TestCase( 3, new TestActual<DummyObject>(obj , null), new AssertReturn(), new AssertException(), new AssertOthers(), expected: (@return: obj , exception: null, others: true )),
                 TestCase( 4, new TestActual<DummyObject>(null, ex  ), null              , new AssertException(), new AssertOthers(), expected: (@return: null, exception: null, others: false), expectedExceptionType: typeof(ArgumentNullException)),
-                TestCase( 5, new TestActual<DummyObject>(null, ex  ), new AssertReturn(), null                 , new AssertOthers(), expected: (@return: null, exception: null, others: false), expectedExceptionType: typeof(DummyException)),
+                TestCase( 5, new TestActual<DummyObject>(null, ex  ), new AssertReturn(), null                 , new AssertOthers(), expected: (@return: null, exception: null, others: false), expectedExceptionType: typeof(TestAssertException)),
                 TestCase( 6, new TestActual<DummyObject>(null, ex  ), new AssertReturn(), new AssertException(), null              , expected: (@return: null, exception: ex  , others: false)),
                 TestCase( 7, new TestActual<DummyObject>(null, ex  ), new AssertReturn(), new AssertException(), new AssertOthers(), expected: (@return: null, exception: ex  , others: true )),
             }) { action(); }

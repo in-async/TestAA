@@ -14,7 +14,7 @@ namespace Inasync {
             if (exception != null) {
                 exception(actual.Exception);
             }
-            else if (actual.Exception != null) { throw actual.Exception; }
+            else if (actual.Exception != null) { throw new TestAssertException(null, innerException: actual.Exception); }
 
             others?.Invoke();
         }
@@ -39,7 +39,7 @@ namespace Inasync {
             if (exception != null) {
                 exception(actual.Exception);
             }
-            else if (actual.Exception != null) { throw actual.Exception; }
+            else if (actual.Exception != null) { throw new TestAssertException(null, innerException: actual.Exception); }
 
             others?.Invoke();
         }

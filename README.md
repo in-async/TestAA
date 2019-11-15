@@ -40,7 +40,7 @@ TestAA.Act(() => { /* ここでテスト対象のメソッドを呼ぶ */ })
     .Act(() => int.Parse("123"))
     .Assert(
         @return: ret => { /* ここで戻り値の検証 */ },
-        exception: ex => { /* ここで例外の検証 */ },
+        exception: ex => { /* ここで例外の検証。省略した場合、Act() で例外が生じていれば再スローされる */ },
         others: () => { /* ここで上記以外の検証。不要なら省略 */ }
     );
 ```
@@ -51,8 +51,7 @@ TestAA.Act(() => { /* ここでテスト対象のメソッドを呼ぶ */ })
 public void IntParseTest() {
     // Success
     TestAA.Act(() => int.Parse("123")).Assert(
-        ret => ret.Is(123),
-        ex => ex?.GetType().Is(null)
+        ret => ret.Is(123)
     );
 
     // FormatException

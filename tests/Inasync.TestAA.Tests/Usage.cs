@@ -23,5 +23,19 @@ namespace Inasync.Tests {
                 TestCase( 2, "123", expected: 123),
             }) { action(); }
         }
+
+        [TestMethod]
+        public void IntParseTest() {
+            // Success
+            TestAA.Act(() => int.Parse("123")).Assert(
+                ret => Assert.AreEqual(123, ret)
+            );
+
+            // FormatException
+            TestAA.Act(() => int.Parse("abc")).Assert(
+                ret => { },
+                ex => Assert.AreEqual(typeof(FormatException), ex?.GetType())
+            );
+        }
     }
 }

@@ -4,12 +4,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Inasync.Tests {
 
     [TestClass]
-    public class TestActualTests {
+    public class TestActual_Tests {
 
         [TestMethod]
         public void Ctor() {
+            // Act
             var ret = new TestActual();
 
+            // Assert
             Assert.IsNull(ret.Exception);
         }
 
@@ -18,8 +20,10 @@ namespace Inasync.Tests {
             Action TestCase(int testNumber, Exception exception) => () => {
                 var msg = "No." + testNumber;
 
+                // Act
                 var ret = new TestActual(exception);
 
+                // Assert
                 Assert.AreEqual(exception, ret.Exception, msg);
             };
 
@@ -57,7 +61,7 @@ namespace Inasync.Tests {
                     , message: $"No.{testNumber}: object.Equals(object)"
                 );
 
-                // AbmPlacementId の == 演算子オーバーロードが機能しないので、常に false。
+                // 固有型の == 演算子オーバーロードが機能しないので、常に false。
                 Assert.AreEqual(false, (object)testActual == (object)other
                     , message: $"No.{testNumber}: object == object"
                 );

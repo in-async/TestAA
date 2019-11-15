@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://github.com/in-async/TestAA</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/in-async/TestAA/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>library test unittest aaa</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
 </Project>

@@ -18,7 +18,7 @@
 ```cs
 TestAA
     .Act(テスト対象コード)
-    .Assert(テスト対象コードの戻り値の検証, 例外の検証, その他の検証);
+    .Assert(テスト対象コードの戻り値の検証, 例外の検証);
 ```
 
 Arrange に相当する処理は `TestAA.Act()` の呼び出しより前に記述します。
@@ -30,7 +30,7 @@ Arrange に相当する処理は `TestAA.Act()` の呼び出しより前に記�
 TestAA.Act(...)
 ```
 
-`Act()` の引数には、テスト対象となるメソッドまたはコードのラムダ式やデリゲートを渡して下さい。テストの対象ではないメソッドまたはコードも含めますと、そこから発生した例外がテスト対象コードから生じたものとして扱われてしまい、正しい検証が行えなくなります。
+`Act()` の引数には、テスト対象となるメソッドまたはコードのラムダ式やデリゲートを渡して下さい。テストの対象ではないメソッドやコードを含めますと、そこから発生した例外がテスト対象コードから生じたものとして扱われてしまい、正しい検証が行えなくなります。
 ```cs
 TestAA.Act(() => { /* ここでテスト対象のメソッドを呼ぶ */ })
 ```
@@ -39,63 +39,72 @@ TestAA.Act(() => { /* ここでテスト対象のメソッドを呼ぶ */ })
 ```cs
     .Act(() => int.Parse("123"))
     .Assert(
-        @return: ret => { /* ここで戻り値の検証 */ },
-        exception: ex => { /* ここで例外の検証。省略した場合、Act() で例外が生じていれば再スローされる */ },
-        others: () => { /* ここで上記以外の検証。不要なら省略 */ }
+        @return: ret => { /* ここで戻り値の検証。Act で例外が生じた場合は戻り値が無いので呼ばれない */ },
+        exception: ex => { /* ここで例外の検証 */ }
     );
 ```
 
-
-## Usage
+検証はラムダ式やデリゲートではなく値を直接入力する事でも可能です。テストの失敗は、既定では `TestAssertFailedException` のスローによって通知されます。
 ```cs
-public void IntParseTest() {
-    // Success
-    TestAA.Act(() => int.Parse("123")).Assert(
-        ret => ret.Is(123)
-    );
+TestAA.Act(() => int.Parse("123")).Assert(123);  // OK
+TestAA.Act(() => int.Parse("abc")).Assert(ret => { }, new FormatException());  // OK
+TestAA.Act(() => int.Parse("abc")).Assert(123);  // TestAssertFailedException
+```
 
-    // FormatException
-    TestAA.Act(() => int.Parse("abc")).Assert(
-        ret => { },
-        ex => ex?.GetType().Is(typeof(FormatException))
-    );
+
+## Examples
+### Basic
+```cs
+TestAA.Act(() => int.Parse("123")).Assert(123);
+```
+### Exception
+```cs
+TestAA.Act(() => int.Parse("abc")).Assert(ret => { }, exception: new FormatException());
+```
+
+### Out parameter
+```cs
+int result = default;
+TestAA.Act(() => int.TryParse("123", out result)).Assert(true);
+
+// Additional Assert
+Assert.AreEqual(123, result);
+```
+
+### Lambda assert
+```cs
+TestAA.Act(() => int.Parse("123")).Assert(
+      @return: ret => Assert.AreEqual(123, ret)
+    , exception: ex => Assert.IsNull(ex)
+);
+```
+
+### Replace default assert
+```cs
+class MSTestAssert : TestAssert {
+    public override void Is<T>(T actual, T expected, string message) {
+        Assert.AreEqual(expected, actual, message);
+    }
 }
+...
+TestAA.TestAssert = new MSTestAssert();
+
+TestAA.Act(() => int.Parse("123")).Assert(123);  // Assert.AreEqual()
 ```
 
-下記は *MSTest* を利用した、より実践的な例です：
+### Test cases
 ```cs
-[DataTestMethod]
-[DataRow(0, null, null, typeof(ArgumentNullException))]
-[DataRow(1, "123", 123, null)]
-[DataRow(2, "abc", null, typeof(FormatException))]
-public void IntParseTest(int testNumber, string input, int expected, Type expectedExceptionType) {
+Action TestCase(int testNumber, string input, int expected, Exception expectedException = null) => () => {
     var msg = "No." + testNumber;
 
-    TestAA.Act(() => int.Parse(input)).Assert(
-        ret => Assert.AreEqual(expected, ret, msg),
-        ex => Assert.AreEqual(expectedExceptionType, ex?.GetType(), msg)
-    );
-}
-```
-または
-```cs
-[TestMethod]
-public void IntParseTest() {
-    Action TestCase(int testNumber, string input, int expected, Type expectedExceptionType = null) => () => {
-        var msg = "No." + testNumber;
+    TestAA.Act(() => int.Parse(input)).Assert(expected, expectedException, msg);
+};
 
-        TestAA.Act(() => int.Parse(input)).Assert(
-            ret => Assert.AreEqual(expected, ret, msg),
-            ex => Assert.AreEqual(expectedExceptionType, ex?.GetType(), msg)
-        );
-    };
-
-    foreach (var action in new[] {
-        TestCase( 0, null , expected: 0  , expectedExceptionType: typeof(ArgumentNullException)),
-        TestCase( 1, "abc", expected: 0  , expectedExceptionType: typeof(FormatException)),
-        TestCase( 2, "123", expected: 123),
-    }) { action(); }
-}
+foreach (var action in new[] {
+    TestCase( 0, null , expected: 0  , expectedException: new ArgumentNullException()),
+    TestCase( 1, "abc", expected: 0  , expectedException: new FormatException()),
+    TestCase( 2, "123", expected: 123),
+}) { action(); }
 ```
 
 

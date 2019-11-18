@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Inasync {
 
     /// <summary>
     /// Act の実行結果を表します。
     /// </summary>
-    public readonly struct TestActual : IEquatable<TestActual> {
+    public readonly partial struct TestActual : IEquatable<TestActual> {
 
+        /// <summary>
+        /// Act で生じた例外を使用して、<see cref="TestActual{TReturn}"/> 構造体のインスタンスを初期化します。
+        /// </summary>
+        /// <param name="exception"><see cref="Exception"/> に渡される値。Act で例外が生じていなければ <c>null</c>。</param>
         internal TestActual(Exception exception) {
             Exception = exception;
         }
@@ -47,10 +52,25 @@ namespace Inasync {
     /// Act の実行結果を表します。
     /// </summary>
     /// <typeparam name="TReturn">Act の戻り値の型。</typeparam>
-    public readonly struct TestActual<TReturn> : IEquatable<TestActual<TReturn>> {
+    public readonly partial struct TestActual<TReturn> : IEquatable<TestActual<TReturn>> {
 
-        internal TestActual(TReturn @return, Exception exception) {
-            Return = exception == null ? @return : default;
+        /// <summary>
+        /// Act の戻り値を使用して、<see cref="TestActual{TReturn}"/> 構造体のインスタンスを初期化します。
+        /// </summary>
+        /// <param name="return"><see cref="Return"/> に渡される値。</param>
+        internal TestActual(TReturn @return) {
+            Return = @return;
+            Exception = null;
+        }
+
+        /// <summary>
+        /// Act で生じた例外を使用して、<see cref="TestActual{TReturn}"/> 構造体のインスタンスを初期化します。
+        /// </summary>
+        /// <param name="exception"><see cref="Exception"/> に渡される値。Not null.</param>
+        internal TestActual(Exception exception) {
+            Debug.Assert(exception != null);
+
+            Return = default;
             Exception = exception;
         }
 

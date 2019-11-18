@@ -8,8 +8,8 @@
     <Description>TestAA is a simple library to support writing tests using Arrange-Act-Assert (AAA) pattern.</Description>
     <PackageProjectUrl>https://github.com/in-async/TestAA</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/in-async/TestAA/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageTags>library test unittest aaa</PackageTags>
-    <Version>0.2.1</Version>
+    <PackageTags>library test unittest AAA</PackageTags>
+    <Version>0.3.0</Version>
   </PropertyGroup>
 
 </Project>

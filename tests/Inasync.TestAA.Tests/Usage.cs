@@ -5,37 +5,64 @@ namespace Inasync.Tests {
 
     [TestClass]
     public class Usage {
+        private static TestAssert _defaultTestAssert;
 
-        [TestMethod]
-        public void Basic() {
-            Action TestCase(int testNumber, string input, int expected, Type expectedExceptionType = null) => () => {
-                var msg = "No." + testNumber;
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context) {
+            _defaultTestAssert = TestAA.TestAssert;
+            TestAA.TestAssert = new MSTestAssert();
+        }
 
-                TestAA.Act(() => int.Parse(input)).Assert(
-                    ret => Assert.AreEqual(expected, ret, msg),
-                    ex => Assert.AreEqual(expectedExceptionType, ex?.GetType(), msg)
-                );
-            };
+        [ClassCleanup]
+        public static void ClassCleanup() {
+            TestAA.TestAssert = _defaultTestAssert;
+        }
 
-            foreach (var action in new[] {
-                TestCase( 0, null , expected: 0  , expectedExceptionType: typeof(ArgumentNullException)),
-                TestCase( 1, "abc", expected: 0  , expectedExceptionType: typeof(FormatException)),
-                TestCase( 2, "123", expected: 123),
-            }) { action(); }
+        private sealed class MSTestAssert : TestAssert {
+
+            public override void Is<T>(T actual, T expected, string message) => Assert.AreEqual(expected, actual, message);
         }
 
         [TestMethod]
-        public void IntParseTest() {
-            // Success
-            TestAA.Act(() => int.Parse("123")).Assert(
-                ret => Assert.AreEqual(123, ret)
-            );
+        public void Basic() {
+            TestAA.Act(() => int.Parse("123")).Assert(123);
+        }
 
-            // FormatException
-            TestAA.Act(() => int.Parse("abc")).Assert(
-                ret => { },
-                ex => Assert.AreEqual(typeof(FormatException), ex?.GetType())
+        [TestMethod]
+        public void Exception() {
+            TestAA.Act(() => int.Parse("abc")).Assert(ret => { }, exception: new FormatException());
+        }
+
+        [TestMethod]
+        public void AssertOutParameter() {
+            int result = default;
+            TestAA.Act(() => int.TryParse("123", out result)).Assert(true);
+
+            // Additional Assert
+            Assert.AreEqual(123, result);
+        }
+
+        [TestMethod]
+        public void CustomAssert() {
+            TestAA.Act(() => int.Parse("123")).Assert(
+                  @return: ret => Assert.AreEqual(123, ret)
+                , exception: ex => Assert.IsNull(ex)
             );
+        }
+
+        [TestMethod]
+        public void TestCases() {
+            Action TestCase(int testNumber, string input, int expected, Exception expectedException = null) => () => {
+                var msg = "No." + testNumber;
+
+                TestAA.Act(() => int.Parse(input)).Assert(expected, expectedException, msg);
+            };
+
+            foreach (var action in new[] {
+                TestCase( 0, null , expected: 0  , expectedException: new ArgumentNullException()),
+                TestCase( 1, "abc", expected: 0  , expectedException: new FormatException()),
+                TestCase( 2, "123", expected: 123),
+            }) { action(); }
         }
     }
 }

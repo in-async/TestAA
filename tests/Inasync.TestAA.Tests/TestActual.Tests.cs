@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Inasync.Tests {
 
     [TestClass]
-    public class TestActual_Tests {
+    public partial class TestActual_Tests {
 
         [TestMethod]
         public void Ctor() {
@@ -98,34 +98,48 @@ namespace Inasync.Tests {
     }
 
     [TestClass]
-    public class TestActual_TReturnTests {
+    public partial class TestActual_TReturn_Tests {
 
         [TestMethod]
         public void Ctor() {
+            // Act
             var ret = new TestActual<DummyObject>();
 
+            // Assert
             Assert.IsNull(ret.Return);
             Assert.IsNull(ret.Exception);
         }
 
         [TestMethod]
-        public void Ctor_Args() {
-            Action TestCase(int testNumber, DummyObject @return, Exception exception, (DummyObject @return, Exception exception) expected) => () => {
+        public void Ctor_TReturn() {
+            Action TestCase(int testNumber, DummyObject @return) => () => {
                 var msg = "No." + testNumber;
 
-                var ret = new TestActual<DummyObject>(@return, exception);
+                // Act
+                var ret = new TestActual<DummyObject>(@return: @return);
 
-                Assert.AreEqual(expected.@return, ret.Return, msg);
-                Assert.AreEqual(expected.exception, ret.Exception, msg);
+                // Assert
+                Assert.AreEqual(@return, ret.Return, msg);
+                Assert.IsNull(ret.Exception, msg);
             };
 
             var obj = new DummyObject();
-            var ex = new DummyException();
             foreach (var action in new[] {
-                TestCase( 0, obj , ex  , (@return: null, exception: ex)),
-                TestCase( 1, null, ex  , (@return: null, exception: ex)),
-                TestCase( 2, obj , null, (@return: obj , exception: null)),
+                TestCase( 0, obj ),
+                TestCase( 1, null),
             }) { action(); }
+        }
+
+        [TestMethod]
+        public void Ctor_Exception() {
+            var ex = new DummyException();
+
+            // Act
+            var ret = new TestActual<DummyObject>(exception: ex);
+
+            // Assert
+            Assert.AreEqual(default, ret.Return);
+            Assert.AreEqual(ex, ret.Exception);
         }
 
         [TestMethod]
@@ -165,26 +179,25 @@ namespace Inasync.Tests {
             var obj = new DummyObject();
             var ex = new DummyException();
             foreach (var action in new[] {
-                TestCase( 0, new TestActual<DummyObject>()       , new TestActual<DummyObject>()                                       , true ),
-                TestCase( 1, new TestActual<DummyObject>(obj, ex), new TestActual<DummyObject>(obj              , ex                  ), true ),
-                TestCase( 2, new TestActual<DummyObject>(obj, ex), new TestActual<DummyObject>(new DummyObject(), ex                  ), true ),
-                TestCase( 3, new TestActual<DummyObject>(obj, ex), new TestActual<DummyObject>(obj              , new DummyException()), false),
+                TestCase( 0, new TestActual<DummyObject>()   , new TestActual<DummyObject>()                    , expected: true ),
+                TestCase( 1, new TestActual<DummyObject>(obj), new TestActual<DummyObject>(obj)                 , expected: true ),
+                TestCase( 2, new TestActual<DummyObject>(obj), new TestActual<DummyObject>(new DummyObject())   , expected: false),
+                TestCase( 3, new TestActual<DummyObject>(obj), new TestActual<DummyObject>(ex)                  , expected: false),
+                TestCase( 4, new TestActual<DummyObject>(ex ), new TestActual<DummyObject>(ex)                  , expected: true ),
+                TestCase( 5, new TestActual<DummyObject>(ex ), new TestActual<DummyObject>(new DummyException()), expected: false),
             }) { action(); }
         }
 
         [TestMethod]
         public new void GetHashCode() {
-            Action TestCase(int testNumber, DummyObject @return, DummyException exception) => () => {
-                var testActual = new TestActual<DummyObject>(@return, exception);
-
+            Action TestCase(int testNumber, TestActual<DummyObject> testActual) => () => {
                 // GetHashCode() は環境によって戻り値が変わるので、例外が起こらない事だけ確認。
                 testActual.GetHashCode();
             };
 
             foreach (var action in new[] {
-                TestCase( 0, new DummyObject(), null),
-                TestCase( 1, null             , new DummyException()),
-                TestCase( 2, new DummyObject(), new DummyException()),
+                TestCase( 0, new TestActual<DummyObject>(@return: new DummyObject())),
+                TestCase( 1, new TestActual<DummyObject>(exception: new DummyException())),
             }) { action(); }
         }
 

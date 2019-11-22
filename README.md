@@ -57,12 +57,12 @@ TestAA.Act(() => int.Parse("abc")).Assert(123);  // TestAssertFailedException
 ```cs
 TestAA.Act(() => int.Parse("123")).Assert(123);
 ```
-### Exception
+### Throws Exception
 ```cs
 TestAA.Act(() => int.Parse("abc")).Assert(ret => { }, exception: new FormatException());
 ```
 
-### Out parameter
+### Out Parameter
 ```cs
 int result = default;
 TestAA.Act(() => int.TryParse("123", out result)).Assert(true);
@@ -71,7 +71,7 @@ TestAA.Act(() => int.TryParse("123", out result)).Assert(true);
 Assert.AreEqual(123, result);
 ```
 
-### Lambda assert
+### Lambda Assert
 ```cs
 TestAA.Act(() => int.Parse("123")).Assert(
       @return: ret => Assert.AreEqual(123, ret)
@@ -79,7 +79,33 @@ TestAA.Act(() => int.Parse("123")).Assert(
 );
 ```
 
-### Replace default assert
+### Task Synchronously
+```cs
+TestAA.Act(() => Task.FromResult(123)).Assert(123);
+```
+
+### Task Throws Exception
+```cs
+TestAA.Act(() => Task.FromException(new ApplicationException())).Assert(new ApplicationException());
+```
+
+### Raw Task
+```cs
+var task = Task.FromResult(123);
+TestAA.Act<Task<int>>(() => task).Assert(task);
+```
+
+### Immediate Enumerable Evaluation
+```cs
+TestAA.Act(() => CreateEnumerable()).Assert(ret => { }, new ApplicationException());
+
+IEnumerable<int> CreateEnumerable() {
+    yield return 123;
+    throw new ApplicationException();
+}
+```
+
+### Replace Default Assert
 ```cs
 class MSTestAssert : TestAssert {
     public override void Is<T>(T actual, T expected, string message) {
@@ -92,7 +118,7 @@ TestAA.TestAssert = new MSTestAssert();
 TestAA.Act(() => int.Parse("123")).Assert(123);  // Assert.AreEqual()
 ```
 
-### Test cases
+### Test Cases
 ```cs
 Action TestCase(int testNumber, string input, int expected, Exception expectedException = null) => () => {
     var msg = "No." + testNumber;

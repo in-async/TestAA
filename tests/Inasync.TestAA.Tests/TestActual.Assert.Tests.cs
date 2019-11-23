@@ -36,13 +36,13 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void Assert_Exception_Message() {
-            Action TestCase(int testNumber, TestActual testActual, Exception exception, Type expectedExceptionType = null) => () => {
+            Action TestCase(int testNumber, TestActual testActual, Type exceptionType, Type expectedExceptionType = null) => () => {
                 var msg = "No." + testNumber;
 
                 // Act
                 Exception exception_ = null;
                 try {
-                    testActual.Assert(exception);
+                    testActual.Assert(exceptionType);
                 }
                 catch (Exception ex_) {
                     exception_ = ex_;
@@ -52,12 +52,35 @@ namespace Inasync.Tests {
                 Assert.AreEqual(expectedExceptionType, exception_?.GetType(), msg);
             };
 
-            var ex = new DummyException();
             foreach (var action in new[]{
-                TestCase( 0, new TestActual(null), null),
-                TestCase( 1, new TestActual(null), ex  , expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 2, new TestActual(ex)  , null, expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 3, new TestActual(ex)  , ex  ),
+                TestCase( 0, new TestActual(null)                , null                 ),
+                TestCase( 1, new TestActual(null)                , typeof(DummyException), expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 2, new TestActual(new DummyException()), null                  , expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 3, new TestActual(new DummyException()), typeof(DummyException)),
+            }) { action(); }
+        }
+
+        [TestMethod]
+        public void Assert_TException_Message() {
+            Action TestCase<TException>(int testNumber, TestActual testActual, Type expectedExceptionType = null) where TException : Exception => () => {
+                var msg = "No." + testNumber;
+
+                // Act
+                Exception exception_ = null;
+                try {
+                    testActual.Assert<TException>();
+                }
+                catch (Exception ex_) {
+                    exception_ = ex_;
+                }
+
+                // Assert
+                Assert.AreEqual(expectedExceptionType, exception_?.GetType(), msg);
+            };
+
+            foreach (var action in new[]{
+                TestCase<DummyException>( 0, new TestActual(null)                , expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase<DummyException>( 1, new TestActual(new DummyException())),
             }) { action(); }
         }
 
@@ -119,13 +142,13 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void Assert_ActionTReturn_Exception_Message() {
-            Action TestCase(int testNumber, TestActual<DummyObject> testActual, AssertReturn @return, Exception exception, DummyObject expectedReturn, Type expectedExceptionType = null) => () => {
+            Action TestCase(int testNumber, TestActual<DummyObject> testActual, AssertReturn @return, Type exceptionType, DummyObject expectedReturn, Type expectedExceptionType = null) => () => {
                 var msg = "No." + testNumber;
 
                 // Act
                 Exception exception_ = null;
                 try {
-                    testActual.Assert(@return?.Invoke, exception);
+                    testActual.Assert(@return?.Invoke, exceptionType);
                 }
                 catch (Exception ex_) {
                     exception_ = ex_;
@@ -137,26 +160,25 @@ namespace Inasync.Tests {
             };
 
             var obj = new DummyObject();
-            var ex = new DummyException();
             foreach (var action in new[]{
-                TestCase( 0, new TestActual<DummyObject>(obj), null              , exception: ex  , expectedReturn: null, expectedExceptionType: typeof(ArgumentNullException)),
-                TestCase( 1, new TestActual<DummyObject>(obj), new AssertReturn(), exception: null, expectedReturn: obj ),
-                TestCase( 2, new TestActual<DummyObject>(obj), new AssertReturn(), exception: ex  , expectedReturn: null, expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 3, new TestActual<DummyObject>(ex ), null              , exception: ex  , expectedReturn: null, expectedExceptionType: typeof(ArgumentNullException)),
-                TestCase( 4, new TestActual<DummyObject>(ex ), new AssertReturn(), exception: null, expectedReturn: null, expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 5, new TestActual<DummyObject>(ex ), new AssertReturn(), exception: ex  , expectedReturn: null),
+                TestCase( 0, new TestActual<DummyObject>(obj                 ), null              , exceptionType: typeof(DummyException), expectedReturn: null, expectedExceptionType: typeof(ArgumentNullException)),
+                TestCase( 1, new TestActual<DummyObject>(obj                 ), new AssertReturn(), exceptionType: null                  , expectedReturn: obj ),
+                TestCase( 2, new TestActual<DummyObject>(obj                 ), new AssertReturn(), exceptionType: typeof(DummyException), expectedReturn: null, expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 3, new TestActual<DummyObject>(new DummyException()), null              , exceptionType: typeof(DummyException), expectedReturn: null, expectedExceptionType: typeof(ArgumentNullException)),
+                TestCase( 4, new TestActual<DummyObject>(new DummyException()), new AssertReturn(), exceptionType: null                  , expectedReturn: null, expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 5, new TestActual<DummyObject>(new DummyException()), new AssertReturn(), exceptionType: typeof(DummyException), expectedReturn: null),
             }) { action(); }
         }
 
         [TestMethod]
         public void Assert_TReturn_Exception_Message() {
-            Action TestCase(int testNumber, TestActual<DummyObject> testActual, DummyObject @return, Exception exception, Type expectedExceptionType = null) => () => {
+            Action TestCase(int testNumber, TestActual<DummyObject> testActual, DummyObject @return, Type exceptionType, Type expectedExceptionType = null) => () => {
                 var msg = "No." + testNumber;
 
                 // Act
                 Exception exception_ = null;
                 try {
-                    testActual.Assert(@return, exception);
+                    testActual.Assert(@return, exceptionType);
                 }
                 catch (Exception ex_) {
                     exception_ = ex_;
@@ -167,14 +189,65 @@ namespace Inasync.Tests {
             };
 
             var obj = new DummyObject();
-            var ex = new DummyException();
             foreach (var action in new[]{
-                TestCase( 0, new TestActual<DummyObject>(obj), @return: null, exception: ex  , expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 1, new TestActual<DummyObject>(obj), @return: obj , exception: null),
-                TestCase( 2, new TestActual<DummyObject>(obj), @return: obj , exception: ex  , expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 3, new TestActual<DummyObject>(ex ), @return: null, exception: ex  ),
-                TestCase( 4, new TestActual<DummyObject>(ex ), @return: obj , exception: null, expectedExceptionType: typeof(TestAssertFailedException)),
-                TestCase( 5, new TestActual<DummyObject>(ex ), @return: obj , exception: ex  ),
+                TestCase( 0, new TestActual<DummyObject>(obj                 ), @return: null, exceptionType: typeof(DummyException), expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 1, new TestActual<DummyObject>(obj                 ), @return: obj , exceptionType: null                 ),
+                TestCase( 2, new TestActual<DummyObject>(obj                 ), @return: obj , exceptionType: typeof(DummyException), expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 3, new TestActual<DummyObject>(new DummyException()), @return: null, exceptionType: typeof(DummyException)),
+                TestCase( 4, new TestActual<DummyObject>(new DummyException()), @return: obj , exceptionType: null                  , expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 5, new TestActual<DummyObject>(new DummyException()), @return: obj , exceptionType: typeof(DummyException)),
+            }) { action(); }
+        }
+
+        [TestMethod]
+        public void Assert_Exception_Message() {
+            Action TestCase(int testNumber, TestActual<DummyObject> testActual, Type exceptionType, Type expectedExceptionType = null) => () => {
+                var msg = "No." + testNumber;
+
+                // Act
+                Exception exception_ = null;
+                try {
+                    testActual.Assert(exceptionType);
+                }
+                catch (Exception ex_) {
+                    exception_ = ex_;
+                }
+
+                // Assert
+                Assert.AreEqual(expectedExceptionType, exception_?.GetType(), msg);
+            };
+
+            var obj = new DummyObject();
+            foreach (var action in new[]{
+                TestCase( 0, new TestActual<DummyObject>(obj                 ), exceptionType: typeof(DummyException), expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase( 1, new TestActual<DummyObject>(obj                 ), exceptionType: null                 ),
+                TestCase( 2, new TestActual<DummyObject>(new DummyException()), exceptionType: typeof(DummyException)),
+                TestCase( 3, new TestActual<DummyObject>(new DummyException()), exceptionType: null                  , expectedExceptionType: typeof(TestAssertFailedException)),
+            }) { action(); }
+        }
+
+        [TestMethod]
+        public void Assert_TException_Message() {
+            Action TestCase<TException>(int testNumber, TestActual<DummyObject> testActual, Type expectedExceptionType = null) where TException : Exception => () => {
+                var msg = "No." + testNumber;
+
+                // Act
+                Exception exception_ = null;
+                try {
+                    testActual.Assert<TException>();
+                }
+                catch (Exception ex_) {
+                    exception_ = ex_;
+                }
+
+                // Assert
+                Assert.AreEqual(expectedExceptionType, exception_?.GetType(), msg);
+            };
+
+            var obj = new DummyObject();
+            foreach (var action in new[]{
+                TestCase<DummyException>( 0, new TestActual<DummyObject>(obj                 ), expectedExceptionType: typeof(TestAssertFailedException)),
+                TestCase<DummyException>( 1, new TestActual<DummyObject>(new DummyException())),
             }) { action(); }
         }
 

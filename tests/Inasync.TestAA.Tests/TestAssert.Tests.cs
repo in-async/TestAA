@@ -35,13 +35,13 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void AssertException() {
-            Action TestCase(int testNumber, Exception actual, Exception expected, string message, string expectedMessage) => () => {
+            Action TestCase(int testNumber, Exception actual, Type expectedType, string message, string expectedMessage) => () => {
                 var msg = "No." + testNumber;
 
                 // Act
                 Exception exception = null;
                 try {
-                    TestAssert.Default.AssertException(actual, expected, message);
+                    TestAssert.Default.AssertException(actual, expectedType, message);
                 }
                 catch (Exception ex) {
                     exception = ex;
@@ -52,13 +52,12 @@ namespace Inasync.Tests {
             };
 
             var exA = new ApplicationException();
-            var exB = new Exception();
             foreach (var action in new[] {
-                TestCase( 0, actual:exA , expected:exA , message:"M" , expectedMessage: null),
-                TestCase( 1, actual:exA , expected:exB , message:"M" , expectedMessage: string.Format("Assert failed.{0}Expected: <System.Exception>{0}Actual: <System.ApplicationException>{0}M{0}Actual Exception: " + exA, Environment.NewLine)),
-                TestCase( 2, actual:exA , expected:exB , message:null, expectedMessage: string.Format("Assert failed.{0}Expected: <System.Exception>{0}Actual: <System.ApplicationException>{0}{0}Actual Exception: " + exA, Environment.NewLine)),
-                TestCase( 3, actual:exA , expected:null, message:"M" , expectedMessage: string.Format("Assert failed.{0}Expected: (null){0}Actual: <System.ApplicationException>{0}M{0}Actual Exception: " + exA, Environment.NewLine)),
-                TestCase( 4, actual:null, expected:exB , message:"M" , expectedMessage: string.Format("Assert failed.{0}Expected: <System.Exception>{0}Actual: (null){0}M", Environment.NewLine)),
+                TestCase( 0, actual:exA , expectedType:typeof(ApplicationException), message:"M" , expectedMessage: null),
+                TestCase( 1, actual:exA , expectedType:typeof(Exception)           , message:"M" , expectedMessage: string.Format("Assert failed.{0}Expected: <System.Exception>{0}Actual: <System.ApplicationException>{0}M{0}Actual Exception: " + exA, Environment.NewLine)),
+                TestCase( 2, actual:exA , expectedType:typeof(Exception)           , message:null, expectedMessage: string.Format("Assert failed.{0}Expected: <System.Exception>{0}Actual: <System.ApplicationException>{0}{0}Actual Exception: " + exA, Environment.NewLine)),
+                TestCase( 3, actual:exA , expectedType:null                        , message:"M" , expectedMessage: string.Format("Assert failed.{0}Expected: (null){0}Actual: <System.ApplicationException>{0}M{0}Actual Exception: " + exA, Environment.NewLine)),
+                TestCase( 4, actual:null, expectedType:typeof(Exception)           , message:"M" , expectedMessage: string.Format("Assert failed.{0}Expected: <System.Exception>{0}Actual: (null){0}M", Environment.NewLine)),
             }) { action(); }
         }
 

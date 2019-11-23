@@ -32,7 +32,7 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void ThrowsException() {
-            TestAA.Act(() => int.Parse("abc")).Assert(ret => { }, exception: new FormatException());
+            TestAA.Act(() => int.Parse("abc")).Assert<FormatException>();
         }
 
         [TestMethod]
@@ -55,22 +55,25 @@ namespace Inasync.Tests {
         [TestMethod]
         public void TaskSynchronously() {
             TestAA.Act(() => Task.FromResult(123)).Assert(123);
+            TestAA.Act(() => new ValueTask<int>(123)).Assert(123);
         }
 
         [TestMethod]
         public void TaskThrowsException() {
-            TestAA.Act(() => Task.FromException(new ApplicationException())).Assert(new ApplicationException());
+            TestAA.Act(() => Task.FromException(new ApplicationException())).Assert<ApplicationException>();
+            TestAA.Act(() => new ValueTask(Task.FromException(new ApplicationException()))).Assert<ApplicationException>();
         }
 
         [TestMethod]
         public void RawTask() {
             var task = Task.FromResult(123);
             TestAA.Act<Task<int>>(() => task).Assert(task);
+            TestAA.Act<ValueTask<int>>(() => new ValueTask<int>(123)).Assert(new ValueTask<int>(123));
         }
 
         [TestMethod]
         public void ImmediateEnumerableEvaluation() {
-            TestAA.Act(() => CreateEnumerable()).Assert(ret => { }, new ApplicationException());
+            TestAA.Act(() => CreateEnumerable()).Assert<ApplicationException>();
 
             IEnumerable<int> CreateEnumerable() {
                 yield return 123;
@@ -80,15 +83,15 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void TestCases() {
-            Action TestCase(int testNumber, string input, int expected, Exception expectedException = null) => () => {
+            Action TestCase(int testNumber, string input, int expected, Type expectedException = null) => () => {
                 var msg = "No." + testNumber;
 
                 TestAA.Act(() => int.Parse(input)).Assert(expected, expectedException, msg);
             };
 
             foreach (var action in new[] {
-                TestCase( 0, null , expected: 0  , expectedException: new ArgumentNullException()),
-                TestCase( 1, "abc", expected: 0  , expectedException: new FormatException()),
+                TestCase( 0, null , expected: 0  , expectedException: typeof(ArgumentNullException)),
+                TestCase( 1, "abc", expected: 0  , expectedException: typeof(FormatException)),
                 TestCase( 2, "123", expected: 123),
             }) { action(); }
         }

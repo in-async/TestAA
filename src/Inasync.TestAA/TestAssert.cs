@@ -37,20 +37,20 @@ namespace Inasync {
         }
 
         /// <summary>
-        /// 2 つの例外が等しいかどうかのテストを行います。
+        /// 生じた例外が予期した型かどうかのテストを行います。
         /// </summary>
         /// <remarks>
         /// 既定では、2 つの例外の型を <see cref="Is{TReturn}(TReturn, TReturn, string)"/> によって比較します。
         /// </remarks>
         /// <param name="actual">実際の例外。</param>
-        /// <param name="expected">予期している例外。</param>
-        /// <param name="message"><paramref name="actual"/> と <paramref name="expected"/> が等しくない場合にテスト結果に表示されるメッセージ。</param>
-        public virtual void AssertException(Exception actual, Exception expected, string message) {
+        /// <param name="expectedType">予期している例外の型。</param>
+        /// <param name="message"><paramref name="actual"/> の型と <paramref name="expectedType"/> が等しくない場合にテスト結果に表示されるメッセージ。</param>
+        public virtual void AssertException(Exception actual, Type expectedType, string message) {
             var finalMessage = message;
             if (actual != null) {
                 finalMessage += Environment.NewLine + "Actual Exception: " + actual;
             }
-            Is(actual?.GetType(), expected?.GetType(), finalMessage);
+            Is(actual?.GetType(), expectedType, finalMessage);
         }
     }
 

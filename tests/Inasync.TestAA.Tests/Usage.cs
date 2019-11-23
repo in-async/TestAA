@@ -32,7 +32,7 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void ThrowsException() {
-            TestAA.Act(() => int.Parse("abc")).Assert(ret => { }, exception: new FormatException());
+            TestAA.Act(() => int.Parse("abc")).Assert<FormatException>();
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void TaskThrowsException() {
-            TestAA.Act(() => Task.FromException(new ApplicationException())).Assert(new ApplicationException());
+            TestAA.Act(() => Task.FromException(new ApplicationException())).Assert<ApplicationException>();
         }
 
         [TestMethod]
@@ -70,7 +70,7 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void ImmediateEnumerableEvaluation() {
-            TestAA.Act(() => CreateEnumerable()).Assert(ret => { }, new ApplicationException());
+            TestAA.Act(() => CreateEnumerable()).Assert<ApplicationException>();
 
             IEnumerable<int> CreateEnumerable() {
                 yield return 123;
@@ -80,15 +80,15 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void TestCases() {
-            Action TestCase(int testNumber, string input, int expected, Exception expectedException = null) => () => {
+            Action TestCase(int testNumber, string input, int expected, Type expectedException = null) => () => {
                 var msg = "No." + testNumber;
 
                 TestAA.Act(() => int.Parse(input)).Assert(expected, expectedException, msg);
             };
 
             foreach (var action in new[] {
-                TestCase( 0, null , expected: 0  , expectedException: new ArgumentNullException()),
-                TestCase( 1, "abc", expected: 0  , expectedException: new FormatException()),
+                TestCase( 0, null , expected: 0  , expectedException: typeof(ArgumentNullException)),
+                TestCase( 1, "abc", expected: 0  , expectedException: typeof(FormatException)),
                 TestCase( 2, "123", expected: 123),
             }) { action(); }
         }

@@ -19,13 +19,25 @@ namespace Inasync {
         /// Act の実行結果を検証します。
         /// </summary>
         /// <param name="exception">
-        /// Act で生じる事が予期される例外。例外が生じない事が予期される場合は <c>null</c>。
+        /// Act で生じる事が予期される例外の型。例外が生じない事が予期される場合は <c>null</c>。
         /// <see cref="TestAA.TestAssert"/> によって実際の例外と比較されます。
         /// </param>
         /// <param name="message">テスト失敗時に結果に表示されるメッセージ。</param>
-        public void Assert(Exception exception = null, string message = null) {
+        public void Assert(Type exception = null, string message = null) {
             var actual = this;
             Assert(ex => TestAA.TestAssert.AssertException(actual.Exception, exception, message));
+        }
+
+        /// <summary>
+        /// Act の実行結果を検証します。
+        /// </summary>
+        /// <typeparam name="TException">
+        /// Act で生じる事が予期される例外の型。
+        /// <see cref="Assert(Type, string)"/> によって実際の例外と比較されます。
+        /// </typeparam>
+        /// <param name="message">テスト失敗時に結果に表示されるメッセージ。</param>
+        public void Assert<TException>(string message = null) where TException : Exception {
+            Assert(exception: typeof(TException), message: message);
         }
     }
 
@@ -55,12 +67,12 @@ namespace Inasync {
         /// </summary>
         /// <param name="return">Act の戻り値を検証するデリゲート。Act で例外が生じた場合は呼ばれません。</param>
         /// <param name="exception">
-        /// Act で生じる事が予期される例外。例外が生じない事が予期される場合は <c>null</c>。
+        /// Act で生じる事が予期される例外の型。例外が生じない事が予期される場合は <c>null</c>。
         /// <see cref="TestAA.TestAssert"/> によって実際の例外と比較されます。
         /// </param>
         /// <param name="message">テスト失敗時に結果に表示されるメッセージ。</param>
         /// <exception cref="ArgumentNullException"><paramref name="return"/> is <c>null</c>.</exception>
-        public void Assert(Action<TReturn> @return, Exception exception = null, string message = null) {
+        public void Assert(Action<TReturn> @return, Type exception = null, string message = null) {
             var actual = this;
             Assert(
                   @return
@@ -77,16 +89,44 @@ namespace Inasync {
         /// Act で例外が生じた場合は比較されません。
         /// </param>
         /// <param name="exception">
-        /// Act で生じる事が予期される例外。例外が生じない事が予期される場合は <c>null</c>。
+        /// Act で生じる事が予期される例外の型。例外が生じない事が予期される場合は <c>null</c>。
         /// <see cref="TestAA.TestAssert"/> によって実際の例外と比較されます。
         /// </param>
         /// <param name="message">テスト失敗時に結果に表示されるメッセージ。</param>
-        public void Assert(TReturn @return, Exception exception = null, string message = null) {
+        public void Assert(TReturn @return, Type exception = null, string message = null) {
             var actual = this;
             Assert(
                   ret => TestAA.TestAssert.Is(actual.Return, @return, message)
                 , ex => TestAA.TestAssert.AssertException(actual.Exception, exception, message)
             );
+        }
+
+        /// <summary>
+        /// Act の実行結果を検証します。
+        /// </summary>
+        /// <param name="exception">
+        /// Act で生じる事が予期される例外の型。例外が生じない事が予期される場合は <c>null</c>。
+        /// <see cref="TestAA.TestAssert"/> によって実際の例外と比較されます。
+        /// </param>
+        /// <param name="message">テスト失敗時に結果に表示されるメッセージ。</param>
+        public void Assert(Type exception = null, string message = null) {
+            var actual = this;
+            Assert(
+                  ret => { }
+                , ex => TestAA.TestAssert.AssertException(actual.Exception, exception, message)
+            );
+        }
+
+        /// <summary>
+        /// Act の実行結果を検証します。
+        /// </summary>
+        /// <typeparam name="TException">
+        /// Act で生じる事が予期される例外の型。
+        /// <see cref="Assert(Type, string)"/> によって実際の例外と比較されます。
+        /// </typeparam>
+        /// <param name="message">テスト失敗時に結果に表示されるメッセージ。</param>
+        public void Assert<TException>(string message = null) where TException : Exception {
+            Assert(exception: typeof(TException), message: message);
         }
     }
 }

@@ -14,11 +14,11 @@
 ## Description
 ***TestAA*** は AAA パターンのうち Act-Assert の記述を直接的に補助します。
 
-基本的な使い方は下記の通りです：
+基本的な使い方は下記になります：
 ```cs
 TestAA
     .Act(テスト対象コード)
-    .Assert(テスト対象コードの戻り値の検証, 例外の検証);
+    .Assert(予期するテスト対象コードの戻り値 or 例外の型);
 ```
 
 Arrange に相当する処理は `TestAA.Act()` の呼び出しより前に記述します。
@@ -35,20 +35,29 @@ TestAA.Act(...)
 TestAA.Act(() => { /* ここでテスト対象のメソッドを呼ぶ */ })
 ```
 
-`Assert()` で `Act()` の結果を検証します。第１引数で `Act()` に渡されたテスト対象コードの戻り値を検証し、第２引数で `Act()` で生じた例外を検証（または例外が生じなかった事を検証）します。
+`Assert()` で `Act()` の結果を検証します。テスト対象コードが例外を生じる事を予期する場合は、`Assert()` の引数または型引数にその例外の型を渡します。
+```cs
+TestAA.Act(() => int.Parse("abc")).Assert(typeof(FormatException));
+TestAA.Act(() => int.Parse("abc")).Assert<FormatException>();
+```
+
+例外が起こらず戻り値が返される事を予期する場合は、`Assert()` の引数に予期する戻り値を渡します。
+```cs
+TestAA.Act(() => int.Parse("123")).Assert(123);
+```
+
+もしテスト結果が予期した値と異なる場合は、既定では `TestAssertFailedException` のスローによってテストの失敗が通知されます。
+```cs
+TestAA.Act(() => int.Parse("abc")).Assert(123);  // TestAssertFailedException
+```
+
+`Assert()` の引数には予期する戻り値や例外の型以外に、より詳細な検証を行う為のラムダ式を渡すことも可能です。
 ```cs
     .Act(() => int.Parse("123"))
     .Assert(
-        @return: ret => { /* ここで戻り値の検証。Act で例外が生じた場合は戻り値が無いので呼ばれない */ },
-        exception: ex => { /* ここで例外の検証 */ }
+        @return: ret => { /* 戻り値の検証コード。Act で例外が生じた場合は戻り値が無いので呼ばれない */ },
+        exception: ex => { /* 例外の検証コード */ }
     );
-```
-
-検証はラムダ式やデリゲートではなく値を直接入力する事でも可能です。テストの失敗は、既定では `TestAssertFailedException` のスローによって通知されます。
-```cs
-TestAA.Act(() => int.Parse("123")).Assert(123);  // OK
-TestAA.Act(() => int.Parse("abc")).Assert<FormatException>();  // OK
-TestAA.Act(() => int.Parse("abc")).Assert(123);  // TestAssertFailedException
 ```
 
 
@@ -132,15 +141,15 @@ TestAA.Act(() => int.Parse("123")).Assert(123);  // Assert.AreEqual()
 
 ### Test Cases
 ```cs
-Action TestCase(int testNumber, string input, int expected, Type expectedException = null) => () => {
+Action TestCase(int testNumber, string input, int expected = default, Type expectedException = null) => () => {
     var msg = "No." + testNumber;
 
     TestAA.Act(() => int.Parse(input)).Assert(expected, expectedException, msg);
 };
 
 foreach (var action in new[] {
-    TestCase( 0, null , expected: 0  , expectedException: typeof(ArgumentNullException)),
-    TestCase( 1, "abc", expected: 0  , expectedException: typeof(FormatException)),
+    TestCase( 0, null , expectedException: typeof(ArgumentNullException)),
+    TestCase( 1, "abc", expectedException: typeof(FormatException)),
     TestCase( 2, "123", expected: 123),
 }) { action(); }
 ```

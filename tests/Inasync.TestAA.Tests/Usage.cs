@@ -83,15 +83,15 @@ namespace Inasync.Tests {
 
         [TestMethod]
         public void TestCases() {
-            Action TestCase(int testNumber, string input, int expected, Type expectedException = null) => () => {
+            Action TestCase(int testNumber, string input, int expected = default, Type expectedException = null) => () => {
                 var msg = "No." + testNumber;
 
                 TestAA.Act(() => int.Parse(input)).Assert(expected, expectedException, msg);
             };
 
             foreach (var action in new[] {
-                TestCase( 0, null , expected: 0  , expectedException: typeof(ArgumentNullException)),
-                TestCase( 1, "abc", expected: 0  , expectedException: typeof(FormatException)),
+                TestCase( 0, null , expectedException: typeof(ArgumentNullException)),
+                TestCase( 1, "abc", expectedException: typeof(FormatException)),
                 TestCase( 2, "123", expected: 123),
             }) { action(); }
         }

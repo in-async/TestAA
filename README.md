@@ -81,18 +81,30 @@ TestAA.Act(() => int.Parse("123")).Assert(
 
 ### Task Synchronously
 ```cs
+// Task
 TestAA.Act(() => Task.FromResult(123)).Assert(123);
+
+// ValueTask
+TestAA.Act(() => new ValueTask<int>(123)).Assert(123);
 ```
 
 ### Task Throws Exception
 ```cs
+// Task
 TestAA.Act(() => Task.FromException(new ApplicationException())).Assert<ApplicationException>();
+
+// ValueTask
+TestAA.Act(() => new ValueTask(Task.FromException(new ApplicationException()))).Assert<ApplicationException>();
 ```
 
 ### Raw Task
 ```cs
+// Task
 var task = Task.FromResult(123);
 TestAA.Act<Task<int>>(() => task).Assert(task);
+
+// ValueTask
+TestAA.Act<ValueTask<int>>(() => new ValueTask<int>(123)).Assert(new ValueTask<int>(123));
 ```
 
 ### Immediate Enumerable Evaluation

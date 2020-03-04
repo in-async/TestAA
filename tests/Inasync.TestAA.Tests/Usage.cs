@@ -55,12 +55,16 @@ namespace Inasync.Tests {
         [TestMethod]
         public void TaskSynchronously() {
             TestAA.Act(() => Task.FromResult(123)).Assert(123);
+            TestAA.Act(task: async () => await Task.FromResult(123)).Assert(123);
+
             TestAA.Act(() => new ValueTask<int>(123)).Assert(123);
         }
 
         [TestMethod]
         public void TaskThrowsException() {
             TestAA.Act(() => Task.FromException(new ApplicationException())).Assert<ApplicationException>();
+            TestAA.Act(task: async () => await Task.FromException(new ApplicationException())).Assert<ApplicationException>();
+
             TestAA.Act(() => new ValueTask(Task.FromException(new ApplicationException()))).Assert<ApplicationException>();
         }
 
@@ -68,6 +72,7 @@ namespace Inasync.Tests {
         public void RawTask() {
             var task = Task.FromResult(123);
             TestAA.Act<Task<int>>(() => task).Assert(task);
+
             TestAA.Act<ValueTask<int>>(() => new ValueTask<int>(123)).Assert(new ValueTask<int>(123));
         }
 

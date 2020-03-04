@@ -92,6 +92,7 @@ TestAA.Act(() => int.Parse("123")).Assert(
 ```cs
 // Task
 TestAA.Act(() => Task.FromResult(123)).Assert(123);
+TestAA.Act(task: async () => await Task.FromResult(123)).Assert(123);
 
 // ValueTask
 TestAA.Act(() => new ValueTask<int>(123)).Assert(123);
@@ -101,6 +102,7 @@ TestAA.Act(() => new ValueTask<int>(123)).Assert(123);
 ```cs
 // Task
 TestAA.Act(() => Task.FromException(new ApplicationException())).Assert<ApplicationException>();
+TestAA.Act(task: async () => await Task.FromException(new ApplicationException())).Assert<ApplicationException>();
 
 // ValueTask
 TestAA.Act(() => new ValueTask(Task.FromException(new ApplicationException()))).Assert<ApplicationException>();
